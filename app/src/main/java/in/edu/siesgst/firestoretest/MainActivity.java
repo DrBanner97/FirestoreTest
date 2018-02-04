@@ -3,9 +3,12 @@ package in.edu.siesgst.firestoretest;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.ButtonBarLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -48,7 +51,8 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 adapter = new EventRecyclerAdapter(eventList, MainActivity.this);
-                adapter.notifyDataSetChanged();
+                recyclerView.setAdapter(adapter);
+//                adapter.notifyDataSetChanged();
 
             }
         });
@@ -60,6 +64,31 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         recyclerView = (RecyclerView) findViewById(R.id.firestore_event_recycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+        Button tech = (Button)findViewById(R.id.tech_only);
+        Button lit = (Button)findViewById(R.id.lit_only);
+        Button cult = (Button)findViewById(R.id.cult_only);
+
+        tech.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getEvents("tech");
+            }
+        });
+
+        lit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getEvents("lit");
+            }
+        });
+
+        cult.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getEvents("cult");
+            }
+        });
+
 
 //        docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
 //            @Override
@@ -71,26 +100,47 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        });
 
-        colRef.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-            @Override
-            public void onSuccess(QuerySnapshot documentSnapshots) {
-                Log.d(TAG, "data=" + documentSnapshots.size());
+//        colRef.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+//            @Override
+//            public void onSuccess(QuerySnapshot documentSnapshots) {
+//                Log.d(TAG, "data=" + documentSnapshots.size());
+//
+//                List<DocumentSnapshot> documentSnapshotList = documentSnapshots.getDocuments();
+//                List<Event> eventList = new ArrayList<>();
+//                for (int i = 0; i < documentSnapshotList.size(); i++) {
+//                    DocumentSnapshot documentSnapshot = documentSnapshotList.get(i);
+//                    Event event = documentSnapshot.toObject(Event.class);
+//                    eventList.add(event);
+//                    Log.d(TAG, "name=" + event.getEvent_name());
+//                }
+//
+//                adapter = new EventRecyclerAdapter(eventList, MainActivity.this);
+//                recyclerView.setAdapter(adapter);
+//
+//
+//            }
+//        });
 
+    }
+
+    private void getEvents(String category){
+        colRef.whereEqualTo("category",category).addSnapshotListener(this,new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(QuerySnapshot documentSnapshots, FirebaseFirestoreException e) {
                 List<DocumentSnapshot> documentSnapshotList = documentSnapshots.getDocuments();
                 List<Event> eventList = new ArrayList<>();
                 for (int i = 0; i < documentSnapshotList.size(); i++) {
                     DocumentSnapshot documentSnapshot = documentSnapshotList.get(i);
                     Event event = documentSnapshot.toObject(Event.class);
                     eventList.add(event);
-                    Log.d(TAG, "name=" + event.getEvent_name());
+                    Log.d(TAG, "onEvent=" + event.getEvent_name());
                 }
 
                 adapter = new EventRecyclerAdapter(eventList, MainActivity.this);
                 recyclerView.setAdapter(adapter);
-
+//                adapter.notifyDataSetChanged();
 
             }
         });
-
     }
 }
